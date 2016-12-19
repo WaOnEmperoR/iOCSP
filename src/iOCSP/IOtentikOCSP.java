@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package iOCSP;
 
 import java.io.File;
@@ -42,7 +41,8 @@ import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
  */
 public class IOtentikOCSP {
 
-    private static final boolean debug = true; 
+    private static final boolean debug = true;
+
     /**
      * @param args the command line arguments
      */
@@ -50,53 +50,49 @@ public class IOtentikOCSP {
         // TODO code application logic here
         ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
-    
-    public static void ReadP12(String filename, String password){
+
+    public static void ReadP12(String filename, String password) {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        
+
         byte[] issuerKeyHash = null, issuerNameHash = null;
         BigInteger serial_number = new BigInteger("0");
-        
+
         KeyStore my_KS;
         try {
             my_KS = KeyStore.getInstance("PKCS12");
             File f = new File(filename);
             FileInputStream is = new FileInputStream(f);
             my_KS.load(is, password.toCharArray());
-            
+
             BigInteger bi_serial = new BigInteger("0");
             Enumeration enumeration = my_KS.aliases();
-            
+
             while (enumeration.hasMoreElements()) {
                 String alias = (String) enumeration.nextElement();
-                if (debug){
+                if (debug) {
                     System.out.println("alias name: " + alias);
                 }
-                
+
                 PrivateKey key = (PrivateKey) my_KS.getKey(alias, password.toCharArray());
-                
+
                 java.security.cert.Certificate[] cchain = my_KS.getCertificateChain(alias);
-                
+
                 int chain_idx = 0;
                 for (Certificate chain_list : cchain) {
                     X509Certificate c = (X509Certificate) chain_list;
                     org.bouncycastle.asn1.x509.Certificate c2 = org.bouncycastle.asn1.x509.Certificate.getInstance(c.getEncoded());
                     Principal subject = c.getSubjectDN();
                     PublicKey the_PK = c.getPublicKey();
-                    
-                    if (chain_idx == 0)
-                    {
+
+                    if (chain_idx == 0) {
                         serial_number = c.getSerialNumber();
-                        
-                        if (debug)
-                        {
+
+                        if (debug) {
                             System.out.println("Serial Number : " + serial_number);
                         }
-                    }
-                    else if (chain_idx==1)
-                    {
+                    } else if (chain_idx == 1) {
                         PublicKey rsaPk = c.getPublicKey();
-                        
+
                         SubjectPublicKeyInfo spki = SubjectPublicKeyInfo.getInstance(rsaPk.getEncoded());
 
                         BcDigestCalculatorProvider calculatorProvider = new BcDigestCalculatorProvider();
@@ -105,18 +101,16 @@ public class IOtentikOCSP {
 
                         X509CertificateHolder hold = new X509CertificateHolder(c2);
                         CertificateID id = new CertificateID(hashCalculator, hold, c.getSerialNumber());
-                        
+
                         issuerKeyHash = id.getIssuerKeyHash();
                         issuerNameHash = id.getIssuerNameHash();
-                        
-                        if (debug)
-                        {
+
+                        if (debug) {
                             System.out.println("Issuer Key Hash : " + Hex.encodeHexString(id.getIssuerKeyHash()));
                             System.out.println("Issuter Name Hash : " + Hex.encodeHexString(id.getIssuerNameHash()));
                         }
-                        
+
                     }
-                    
                     chain_idx++;
                 }
             }
@@ -129,8 +123,8 @@ public class IOtentikOCSP {
         }
 
         OCSPBuilder ob = new OCSPBuilder();
-        
+
         ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number);
     }
-    
+
 }

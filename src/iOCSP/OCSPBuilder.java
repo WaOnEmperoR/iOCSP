@@ -86,18 +86,18 @@ public class OCSPBuilder {
             ASN1EncodableVector req_vector = new ASN1EncodableVector();
             req_vector.add(r1);
 
-            ASN1Sequence req_seq =(ASN1Sequence)new DERSequence(req_vector);
-            
+            ASN1Sequence req_seq = (ASN1Sequence) new DERSequence(req_vector);
+
             BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
-            
+
             ASN1ObjectIdentifier nonce_obj = new ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.1.2");
-            Extension [] ext_arr = new Extension[1];
+            Extension[] ext_arr = new Extension[1];
             ext_arr[0] = new Extension(nonce_obj, false, Base64.encode(nonce.toByteArray()));
-            
+
             Extensions exts = new Extensions(ext_arr);
-            TBSRequest tbsRequest = new TBSRequest(null, req_seq, exts); 
+            TBSRequest tbsRequest = new TBSRequest(null, req_seq, exts);
             OCSPRequest ocspReq = new OCSPRequest(tbsRequest, null);
-            
+
             UUID uuid1 = UUID.randomUUID();
             System.out.println(uuid1);
 
