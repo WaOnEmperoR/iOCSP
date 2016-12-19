@@ -10,39 +10,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Security;
-import java.util.Calendar;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.ocsp.CertID;
-import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.asn1.ocsp.Request;
 import org.bouncycastle.asn1.ocsp.TBSRequest;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.jasn.BitString;
-import org.jasn.ObjectIdentifier;
 
 /**
  *
@@ -54,7 +41,7 @@ public class OCSPBuilder {
 
     }
 
-    public void buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber, byte[] SKI, byte[] basic_constraint) {
+    public void buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber) {
         //Add provider BC 
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
@@ -100,23 +87,6 @@ public class OCSPBuilder {
             req_vector.add(r1);
 
             ASN1Sequence req_seq =(ASN1Sequence)new DERSequence(req_vector);
-            
-            // create details for nonce extension   
-//            BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
-//            Vector oids = new Vector();
-//            Vector values = new Vector();
-//
-//            oids.add(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-//            values.add(new X509Extension(false, new DEROctetString(nonce.toByteArray())));
-            
-            GeneralName name = new GeneralName(1, "Rachmawan Atmaji");
-            
-//            ASN1ObjectIdentifier sub_key_ident = new ASN1ObjectIdentifier("2.5.29.14");
-//            ASN1ObjectIdentifier constraint = new ASN1ObjectIdentifier("2.5.29.19");
-//            
-//            Extension [] ext_arr = new Extension[2];
-//            ext_arr[0] = new Extension(sub_key_ident, true, SKI);
-//            ext_arr[1] = new Extension(constraint, true, basic_constraint);
             
             BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
             

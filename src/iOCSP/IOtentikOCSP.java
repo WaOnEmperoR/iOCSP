@@ -48,14 +48,11 @@ public class IOtentikOCSP {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev.p12", "aji123456");
+        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
     
     public static void ReadP12(String filename, String password){
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        
-        byte[] subject_key_identifier = null;
-        byte[] basic_constraint = null;
         
         byte[] issuerKeyHash = null, issuerNameHash = null;
         BigInteger serial_number = new BigInteger("0");
@@ -90,8 +87,6 @@ public class IOtentikOCSP {
                     if (chain_idx == 0)
                     {
                         serial_number = c.getSerialNumber();
-                        subject_key_identifier = c.getExtensionValue("2.5.29.14");
-                        basic_constraint = c.getExtensionValue("2.5.29.19");
                         
                         if (debug)
                         {
@@ -135,7 +130,7 @@ public class IOtentikOCSP {
 
         OCSPBuilder ob = new OCSPBuilder();
         
-        ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number, subject_key_identifier, basic_constraint);
+        ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number);
     }
     
 }
