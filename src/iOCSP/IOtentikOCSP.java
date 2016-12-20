@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -46,12 +47,13 @@ public class IOtentikOCSP {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws OCSPException {
         // TODO code application logic here
+        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
         ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
 
-    public static void ReadP12(String filename, String password) {
+    public static void ReadP12(String filename, String password) throws OCSPException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         byte[] issuerKeyHash = null, issuerNameHash = null;
@@ -124,7 +126,11 @@ public class IOtentikOCSP {
 
         OCSPBuilder ob = new OCSPBuilder();
 
-        ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number);
+        OCSPRequest myRequest = ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number);
+        
+        OCSPReader reader = new OCSPReader();
+        
+        byte[] hasil = reader.getEncoded(myRequest, "http://rootca.bppt.go.id/ejbca/publicweb/status/ocsp");
     }
 
 }

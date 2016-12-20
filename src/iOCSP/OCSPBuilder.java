@@ -41,7 +41,7 @@ public class OCSPBuilder {
 
     }
 
-    public void buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber) {
+    public OCSPRequest buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber) {
         //Add provider BC 
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
@@ -105,10 +105,13 @@ public class OCSPBuilder {
                 fileOuputStream.write(ocspReq.getEncoded("DER"));
             }
             System.out.println("==============================");
+            
+            return ocspReq;
         } catch (IOException ex) {
             Logger.getLogger(OCSPBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
+        return null;
     }
 
 }
