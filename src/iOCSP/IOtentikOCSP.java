@@ -8,6 +8,7 @@ package iOCSP;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyStore;
@@ -22,19 +23,27 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  *
@@ -46,16 +55,20 @@ public class IOtentikOCSP {
 
     /**
      * @param args the command line arguments
+     * @throws org.bouncycastle.cert.ocsp.OCSPException
+     * @throws java.io.FileNotFoundException
      */
-    public static void main(String[] args) throws OCSPException {
+    public static void main(String[] args) throws OCSPException, FileNotFoundException {
         // TODO code application logic here
-        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
-        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
+        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
+        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
 
-    public static void ReadP12(String filename, String password) throws OCSPException {
+    public static void ReadP12(String filename, String password) throws OCSPException, FileNotFoundException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
+        String ocsp_str = "";
+        
         byte[] issuerKeyHash = null, issuerNameHash = null;
         BigInteger serial_number = new BigInteger("0");
 
@@ -88,9 +101,11 @@ public class IOtentikOCSP {
 
                     if (chain_idx == 0) {
                         serial_number = c.getSerialNumber();
-
+                        ocsp_str = getOCSPPath(c);
+                        
                         if (debug) {
                             System.out.println("Serial Number : " + serial_number);
+                            System.out.println("OCSP : " + ocsp_str);
                         }
                     } else if (chain_idx == 1) {
                         PublicKey rsaPk = c.getPublicKey();
@@ -126,11 +141,59 @@ public class IOtentikOCSP {
 
         OCSPBuilder ob = new OCSPBuilder();
 
-        OCSPRequest myRequest = ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number);
+        UUID uuid1 = UUID.randomUUID();
+        if (debug)
+        {
+            System.out.println(uuid1);
+        }
         
+        OCSPRequest myRequest = ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number, uuid1);
+
         OCSPReader reader = new OCSPReader();
+
+        if (ocsp_str.equals(""))
+        {
+            ocsp_str = "http://rootca.bppt.go.id/ejbca/publicweb/status/ocsp";
+        }
+        byte[] ocspRep = reader.getEncoded(myRequest, ocsp_str);
         
-        byte[] hasil = reader.getEncoded(myRequest, "http://rootca.bppt.go.id/ejbca/publicweb/status/ocsp");
+        try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
+            fileOuputStream.write(ocspRep);
+        }
+        catch(IOException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+        System.out.println("==============================");
+    }
+
+    private static String getOCSPPath(X509Certificate cert) {
+        String ocspPath = "";
+
+        byte[] authInfoAccessExt = cert.getExtensionValue("1.3.6.1.5.5.7.1.1");
+
+        try {
+            ASN1Sequence asn1Seq = (ASN1Sequence) X509ExtensionUtil.fromExtensionValue(authInfoAccessExt); // AuthorityInfoAccessSyntax
+            Enumeration<?> objects = asn1Seq.getObjects();
+
+            while (objects.hasMoreElements()) {
+                ASN1Sequence obj = (ASN1Sequence) objects.nextElement();
+                ASN1Encodable oid = obj.getObjectAt(0); // accessMethod
+                DERTaggedObject location = (DERTaggedObject) obj.getObjectAt(1); // accessLocation
+
+                if (location.getTagNo() == GeneralName.uniformResourceIdentifier) {
+                    DEROctetString uri = (DEROctetString) location.getObject();
+                    ocspPath = new String(uri.getOctets());
+                    if (oid.equals(X509ObjectIdentifiers.id_ad_ocsp)) {
+                        return ocspPath;
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(IOtentikOCSP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return ocspPath;
     }
 
 }

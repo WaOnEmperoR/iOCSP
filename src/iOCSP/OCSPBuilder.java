@@ -41,7 +41,7 @@ public class OCSPBuilder {
 
     }
 
-    public OCSPRequest buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber) {
+    public OCSPRequest buildRequest(byte[] pub_key, byte[] issuer_name, BigInteger serialNumber, UUID uniqueID) {
         //Add provider BC 
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
@@ -98,10 +98,7 @@ public class OCSPBuilder {
             TBSRequest tbsRequest = new TBSRequest(null, req_seq, exts);
             OCSPRequest ocspReq = new OCSPRequest(tbsRequest, null);
 
-            UUID uuid1 = UUID.randomUUID();
-            System.out.println(uuid1);
-
-            try (FileOutputStream fileOuputStream = new FileOutputStream("Request_" + uuid1 + ".DER")) {
+            try (FileOutputStream fileOuputStream = new FileOutputStream("Request_" + uniqueID + ".DER")) {
                 fileOuputStream.write(ocspReq.getEncoded("DER"));
             }
             System.out.println("==============================");
