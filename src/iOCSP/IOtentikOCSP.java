@@ -60,14 +60,15 @@ public class IOtentikOCSP {
      */
     public static void main(String[] args) throws OCSPException, FileNotFoundException {
         // TODO code application logic here
-        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
-        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
+        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
+        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
 
     public static void ReadP12(String filename, String password) throws OCSPException, FileNotFoundException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         String ocsp_str = "";
+        PublicKey issuerPublicKey = null;
         
         byte[] issuerKeyHash = null, issuerNameHash = null;
         BigInteger serial_number = new BigInteger("0");
@@ -92,13 +93,13 @@ public class IOtentikOCSP {
 
                 java.security.cert.Certificate[] cchain = my_KS.getCertificateChain(alias);
 
+                //Assuming that chaining is bottom-up, meaning that certificate[0] is user cert,
+                //certificate[1] is issuer cert(intermediate CA), and certificate[2] is root CA cert
                 int chain_idx = 0;
                 for (Certificate chain_list : cchain) {
                     X509Certificate c = (X509Certificate) chain_list;
                     org.bouncycastle.asn1.x509.Certificate c2 = org.bouncycastle.asn1.x509.Certificate.getInstance(c.getEncoded());
-                    Principal subject = c.getSubjectDN();
-                    PublicKey the_PK = c.getPublicKey();
-
+                    
                     if (chain_idx == 0) {
                         serial_number = c.getSerialNumber();
                         ocsp_str = getOCSPPath(c);
@@ -108,9 +109,9 @@ public class IOtentikOCSP {
                             System.out.println("OCSP : " + ocsp_str);
                         }
                     } else if (chain_idx == 1) {
-                        PublicKey rsaPk = c.getPublicKey();
+                        issuerPublicKey = c.getPublicKey();
 
-                        SubjectPublicKeyInfo spki = SubjectPublicKeyInfo.getInstance(rsaPk.getEncoded());
+                        SubjectPublicKeyInfo spki = SubjectPublicKeyInfo.getInstance(issuerPublicKey.getEncoded());
 
                         BcDigestCalculatorProvider calculatorProvider = new BcDigestCalculatorProvider();
                         String algOID = "1.3.14.3.2.26"; // SHA-1
@@ -126,8 +127,7 @@ public class IOtentikOCSP {
                             System.out.println("Issuer Key Hash : " + Hex.encodeHexString(id.getIssuerKeyHash()));
                             System.out.println("Issuter Name Hash : " + Hex.encodeHexString(id.getIssuerNameHash()));
                         }
-
-                    }
+                    } 
                     chain_idx++;
                 }
             }
@@ -155,7 +155,7 @@ public class IOtentikOCSP {
         {
             ocsp_str = "http://rootca.bppt.go.id/ejbca/publicweb/status/ocsp";
         }
-        byte[] ocspRep = reader.getEncoded(myRequest, ocsp_str);
+        byte[] ocspRep = reader.getEncoded(myRequest, ocsp_str, issuerPublicKey );
         
         try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
             fileOuputStream.write(ocspRep);
