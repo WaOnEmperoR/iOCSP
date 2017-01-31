@@ -157,13 +157,13 @@ public class IOtentikOCSP {
         }
         byte[] ocspRep = reader.getEncoded(myRequest, ocsp_str, issuerPublicKey );
         
-        try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
-            fileOuputStream.write(ocspRep);
-        }
-        catch(IOException ex)
-        {
-            System.out.println(ex.getMessage());
-        }
+//        try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
+//            fileOuputStream.write(ocspRep);
+//        }
+//        catch(IOException ex)
+//        {
+//            System.out.println(ex.getMessage());
+//        }
         System.out.println("==============================");
     }
 
