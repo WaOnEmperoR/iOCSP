@@ -71,6 +71,8 @@ public class OCSPReader {
                     SingleResp resp = responses[0];
                     Object status = resp.getCertStatus();
 
+                    System.out.println("==============================");
+                    
                     if (status == org.bouncycastle.cert.ocsp.CertificateStatus.GOOD) {
                         System.out.println("Certificate is Good");
                         return basicResponse.getEncoded();

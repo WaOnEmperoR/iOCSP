@@ -60,8 +60,8 @@ public class IOtentikOCSP {
      */
     public static void main(String[] args) throws OCSPException, FileNotFoundException {
         // TODO code application logic here
-        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
-        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
+        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
+        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
     }
 
     public static void ReadP12(String filename, String password) throws OCSPException, FileNotFoundException {
@@ -105,8 +105,8 @@ public class IOtentikOCSP {
                         ocsp_str = getOCSPPath(c);
                         
                         if (debug) {
-                            System.out.println("Serial Number : " + serial_number);
-                            System.out.println("OCSP : " + ocsp_str);
+                            System.out.println("Serial Number : " + Hex.encodeHexString(serial_number.toByteArray()));
+                            System.out.println("OCSP Server : " + ocsp_str);
                         }
                     } else if (chain_idx == 1) {
                         issuerPublicKey = c.getPublicKey();
@@ -144,7 +144,7 @@ public class IOtentikOCSP {
         UUID uuid1 = UUID.randomUUID();
         if (debug)
         {
-            System.out.println(uuid1);
+            System.out.println("Unique ID : " + uuid1);
         }
         
         OCSPRequest myRequest = ob.buildRequest(issuerNameHash, issuerKeyHash, serial_number, uuid1);
