@@ -13,6 +13,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.PublicKey;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
@@ -47,6 +50,13 @@ public class OCSPReader {
             con.setRequestProperty("Content-Type", "application/ocsp-request");
             con.setRequestProperty("Accept", "application/ocsp-response");
             con.setDoOutput(true);
+            
+//            Map<String, List<String>> hdrs = con.getHeaderFields();
+//    Set<String> hdrKeys = hdrs.keySet();
+//
+//    for (String k : hdrKeys)
+//      System.out.println("Key: " + k + "  Value: " + hdrs.get(k));
+    
             OutputStream out = con.getOutputStream();
             try (DataOutputStream dataOut = new DataOutputStream(new BufferedOutputStream(out))) {
                 dataOut.write(array);

@@ -60,8 +60,9 @@ public class IOtentikOCSP {
      */
     public static void main(String[] args) throws OCSPException, FileNotFoundException {
         // TODO code application logic here
-        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
-        //ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
+//        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajinorev_Backup.p12", "aji123456");
+//        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\Study PKI\\ajirev.p12", "aji123456");
+        ReadP12("D:\\Tugas PTIK\\Certificate Authority\\E-voting\\mempawah\\iqbal_196909191994031004.p12", "iqbal1969");
     }
 
     public static void ReadP12(String filename, String password) throws OCSPException, FileNotFoundException {
@@ -125,17 +126,13 @@ public class IOtentikOCSP {
 
                         if (debug) {
                             System.out.println("Issuer Key Hash : " + Hex.encodeHexString(id.getIssuerKeyHash()));
-                            System.out.println("Issuter Name Hash : " + Hex.encodeHexString(id.getIssuerNameHash()));
+                            System.out.println("Issuer Name Hash : " + Hex.encodeHexString(id.getIssuerNameHash()));
                         }
                     } 
                     chain_idx++;
                 }
             }
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | OperatorCreationException | OCSPException ex) {
-            Logger.getLogger(IOtentikOCSP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(IOtentikOCSP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | OperatorCreationException | OCSPException | IOException ex) {
             Logger.getLogger(IOtentikOCSP.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -157,13 +154,13 @@ public class IOtentikOCSP {
         }
         byte[] ocspRep = reader.getEncoded(myRequest, ocsp_str, issuerPublicKey );
         
-//        try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
-//            fileOuputStream.write(ocspRep);
-//        }
-//        catch(IOException ex)
-//        {
-//            System.out.println(ex.getMessage());
-//        }
+        try (FileOutputStream fileOuputStream = new FileOutputStream("Response_" + uuid1 + ".DER")) {
+            fileOuputStream.write(ocspRep);
+        }
+        catch(IOException ex)
+        {
+            System.out.println(ex.getMessage());
+        }
         System.out.println("==============================");
     }
 

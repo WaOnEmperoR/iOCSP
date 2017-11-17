@@ -98,10 +98,10 @@ public class OCSPBuilder {
             TBSRequest tbsRequest = new TBSRequest(null, req_seq, exts);
             OCSPRequest ocspReq = new OCSPRequest(tbsRequest, null);
 
-//            try (FileOutputStream fileOuputStream = new FileOutputStream("Request_" + uniqueID + ".DER")) {
-//                fileOuputStream.write(ocspReq.getEncoded("DER"));
-//            }
-//            System.out.println("==============================");
+            try (FileOutputStream fileOuputStream = new FileOutputStream("Request_" + uniqueID + ".DER")) {
+                fileOuputStream.write(ocspReq.getEncoded("DER"));
+            }
+            System.out.println("==============================");
             
             return ocspReq;
         } catch (IOException ex) {
